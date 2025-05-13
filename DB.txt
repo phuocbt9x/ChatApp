@@ -1,0 +1,28 @@
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE channels (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE channel_user (
+  user_id INT NOT NULL,
+  channel_id INT NOT NULL,
+  last_read_at TIMESTAMP DEFAULT NULL,
+  PRIMARY KEY (user_id, channel_id),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (channel_id) REFERENCES channels(id)
+);
+
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  channel_id INT NOT NULL,
+  user_id INT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (channel_id) REFERENCES channels(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);

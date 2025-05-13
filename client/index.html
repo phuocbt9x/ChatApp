@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat App</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 30px auto; }
+    #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+    .msg { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>Chat Channels</h1>
+
+  <div>
+    <label>User ID: <input type="number" id="userId" value="1" /></label><br>
+    <label>Channel ID: <input type="number" id="channelId" value="1" /></label><br>
+    <button onclick="joinChannel()">Join Channel</button>
+  </div>
+
+  <hr>
+
+  <div id="messages"></div>
+
+  <input type="text" id="messageInput" placeholder="Type a message..." />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const socket = io('http://localhost:3000');
+
+    function joinChannel() {
+      const userId = Number(document.getElementById('userId').value);
+      const channelId = Number(document.getElementById('channelId').value);
+      socket.emit('joinChannel', { userId, channelId });
+
+      // Optional: clear messages on join
+      document.getElementById('messages').innerHTML = '';
+    }
+
+    function sendMessage() {
+      const content = document.getElementById('messageInput').value;
+      const userId = Number(document.getElementById('userId').value);
+      const channelId = Number(document.getElementById('channelId').value);
+
+      if (content.trim() === '') return;
+
+      socket.emit('sendMessage', { content, userId, channelId });
+      document.getElementById('messageInput').value = '';
+    }
+
+    socket.on('newMessage', (message) => {
+      const div = document.createElement('div');
+      div.classList.add('msg');
+      div.textContent = `👤User ${message.user_id}: ${message.content}`;
+      document.getElementById('messages').appendChild(div);
+
+      // Đánh dấu là đã đọc
+      const userId = Number(document.getElementById('userId').value);
+      const channelId = Number(document.getElementById('channelId').value);
+      socket.emit('markRead', { userId, channelId });
+    });
+  </script>
+</body>
+</html>
